@@ -1,5 +1,5 @@
 fastapi>=0.143.2,<1.0
-uvicorn[standard]>=0.30
+uvicorn[standard]>=0.54.0
 SQLAlchemy>=2.1.4,<2.2
 alembic>=1.13
 pydantic>=2.7,<3.0
