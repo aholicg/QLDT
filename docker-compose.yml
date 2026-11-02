@@ -36,6 +36,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required in .env}
       MIN_CREDITS_PER_SEMESTER: ${MIN_CREDITS_PER_SEMESTER:-12}
       MAX_CREDITS_PER_SEMESTER: ${MAX_CREDITS_PER_SEMESTER:-24}
+      RECEIPT_FONT_PATH: ${RECEIPT_FONT_PATH:-}
+      RECEIPT_LOGO_PATH: ${RECEIPT_LOGO_PATH:-}
     depends_on:
       db: { condition: service_healthy }
     expose: ["8000"]          # chỉ mạng nội bộ; bên ngoài đi qua gateway

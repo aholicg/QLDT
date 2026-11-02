@@ -350,9 +350,7 @@ def test_section_rejects_duplicate_code_and_invalid_values(client, training_worl
 
     bad_period = client.post(
         "/api/sections",
-        json=_section_payload(
-            training_world, "TST-S203", startPeriod=5, endPeriod=3, dayOfWeek=7
-        ),
+        json=_section_payload(training_world, "TST-S203", startPeriod=5, endPeriod=3, dayOfWeek=7),
         headers=admin,
     )
     assert bad_period.status_code == 400
@@ -460,6 +458,61 @@ def test_section_detects_room_and_lecturer_conflicts(client, training_world):
         endPeriod=6,
         maxCapacity=30,
     )
+
+
+def test_admin_schedule_update_reports_student_conflict_structure(client, training_world):
+    admin = _admin(client)
+    student = _student(client)
+    first = _create_section(
+        client,
+        admin,
+        training_world,
+        "SEC-STUDENT-1",
+        dayOfWeek=2,
+        startPeriod=1,
+        endPeriod=3,
+    )
+    second = _create_section(
+        client,
+        admin,
+        training_world,
+        "SEC-STUDENT-2",
+        subjectId=training_world["subject_b"].id,
+        lecturerId=training_world["gv2"].id,
+        roomId=training_world["room_b"].id,
+        dayOfWeek=3,
+        startPeriod=5,
+        endPeriod=6,
+        maxCapacity=30,
+    )
+    _register(client, student, first["id"])
+    _register(client, student, second["id"])
+
+    update = client.put(
+        f"/api/sections/{second['id']}",
+        headers=admin,
+        json=_update_payload(
+            training_world,
+            "SEC-STUDENT-2",
+            subjectId=training_world["subject_b"].id,
+            lecturerId=training_world["gv2"].id,
+            roomId=training_world["room_b"].id,
+            dayOfWeek=2,
+            startPeriod=2,
+            endPeriod=4,
+            maxCapacity=30,
+        ),
+    )
+    assert update.status_code == 409, update.text
+    assert update.json()["error"] == "SCHEDULE_CONFLICT"
+    detail = update.json()["details"][0]
+    assert detail["type"] == "STUDENT"
+    assert detail["sectionA"] == "SEC-STUDENT-2"
+    assert detail["sectionB"] == "SEC-STUDENT-1"
+    assert detail["studentCode"] == "20210001"
+    assert detail["dayOfWeek"] == 2
+    assert detail["periods"] == {"start": 2, "end": 3}
+    assert detail["weeks"] == {"start": 1, "end": 15}
 
 
 def test_section_update_guards_capacity_and_enrolled_identity(client, training_world, db_session):
@@ -580,9 +633,7 @@ def test_admin_roster_access_and_payload(client, training_world):
     student = client.get(f"/api/sections/{section['id']}/students", headers=_student(client))
     assert student.status_code == 403
 
-    assert (
-        client.get("/api/sections/999999/students", headers=admin).status_code == 404
-    )
+    assert client.get("/api/sections/999999/students", headers=admin).status_code == 404
 
 
 def test_registration_does_not_require_prerequisite_or_corequisite(client, training_world):
@@ -655,7 +706,9 @@ def test_contract_and_database_schema_have_no_prerequisite_or_corequisite(client
     assert "sectionId" in register_properties
 
     schema_sql = (
-        Path(__file__).resolve().parents[2] / "db" / "schema.sql"
-    ).read_text(encoding="utf-8").lower()
+        (Path(__file__).resolve().parents[2] / "db" / "schema.sql")
+        .read_text(encoding="utf-8")
+        .lower()
+    )
     assert "prerequisite" not in schema_sql
     assert "corequisite" not in schema_sql

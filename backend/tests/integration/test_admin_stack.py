@@ -138,13 +138,13 @@ def training_env(db_engine) -> Iterator[dict]:
     with Session(db_engine) as db:
         section_ids = list(context["section_ids"])
         section_ids.extend(
-            db.scalars(select(CourseSection.id).where(CourseSection.lecturer_id == context["lecturer_id"]))
+            db.scalars(
+                select(CourseSection.id).where(CourseSection.lecturer_id == context["lecturer_id"])
+            )
         )
         section_ids = sorted(set(section_ids))
         if section_ids:
-            db.execute(
-                delete(Registration).where(Registration.section_id.in_(section_ids))
-            )
+            db.execute(delete(Registration).where(Registration.section_id.in_(section_ids)))
         if context["student_ids"]:
             db.execute(
                 delete(Registration).where(Registration.student_id.in_(context["student_ids"]))
@@ -200,10 +200,14 @@ def test_admin_subject_crud_persists_to_mysql(api, admin_headers, db_engine, tra
     training_env["subject_ids"].append(created["id"])
 
     with db_engine.connect() as connection:
-        row = connection.execute(
-            text("SELECT name, credits FROM SUBJECTS WHERE subject_code = :code"),
-            {"code": code},
-        ).mappings().one()
+        row = (
+            connection.execute(
+                text("SELECT name, credits FROM SUBJECTS WHERE subject_code = :code"),
+                {"code": code},
+            )
+            .mappings()
+            .one()
+        )
     assert row["name"] == f"Môn tích hợp {code}"
     assert row["credits"] == 3
 
@@ -215,10 +219,14 @@ def test_admin_subject_crud_persists_to_mysql(api, admin_headers, db_engine, tra
     assert updated.status_code == 200, updated.text
 
     with db_engine.connect() as connection:
-        row = connection.execute(
-            text("SELECT name, credits FROM SUBJECTS WHERE subject_code = :code"),
-            {"code": code},
-        ).mappings().one()
+        row = (
+            connection.execute(
+                text("SELECT name, credits FROM SUBJECTS WHERE subject_code = :code"),
+                {"code": code},
+            )
+            .mappings()
+            .one()
+        )
     assert row["name"] == f"Đã sửa {code}"
     assert row["credits"] == 4
 
@@ -246,13 +254,17 @@ def test_admin_section_crud_and_conflict_persist_to_mysql(
     training_env["section_ids"].append(section["id"])
 
     with db_engine.connect() as connection:
-        row = connection.execute(
-            text(
-                "SELECT section_code, day_of_week, max_capacity "
-                "FROM COURSE_SECTIONS WHERE section_id = :section_id"
-            ),
-            {"section_id": section["id"]},
-        ).mappings().one()
+        row = (
+            connection.execute(
+                text(
+                    "SELECT section_code, day_of_week, max_capacity "
+                    "FROM COURSE_SECTIONS WHERE section_id = :section_id"
+                ),
+                {"section_id": section["id"]},
+            )
+            .mappings()
+            .one()
+        )
     assert row["section_code"] == code
     assert row["day_of_week"] == 2
     assert row["max_capacity"] == 50
@@ -267,25 +279,25 @@ def test_admin_section_crud_and_conflict_persist_to_mysql(
 
     update_payload = {key: value for key, value in payload.items() if key != "sectionCode"}
     update_payload.update({"dayOfWeek": 3, "startPeriod": 4, "endPeriod": 6})
-    updated = api.put(
-        f"/sections/{section['id']}", json=update_payload, headers=admin_headers
-    )
+    updated = api.put(f"/sections/{section['id']}", json=update_payload, headers=admin_headers)
     assert updated.status_code == 200, updated.text
 
     with db_engine.connect() as connection:
-        row = connection.execute(
-            text("SELECT day_of_week FROM COURSE_SECTIONS WHERE section_id = :section_id"),
-            {"section_id": section["id"]},
-        ).mappings().one()
+        row = (
+            connection.execute(
+                text("SELECT day_of_week FROM COURSE_SECTIONS WHERE section_id = :section_id"),
+                {"section_id": section["id"]},
+            )
+            .mappings()
+            .one()
+        )
     assert row["day_of_week"] == 3
 
     assert api.delete(f"/sections/{section['id']}", headers=admin_headers).status_code == 204
     training_env["section_ids"].remove(section["id"])
 
 
-def test_admin_roster_matches_mysql_registrations(
-    api, admin_headers, db_engine, training_env
-):
+def test_admin_roster_matches_mysql_registrations(api, admin_headers, db_engine, training_env):
     subject = _create_subject(api, admin_headers, _unique("TSTI"))
     training_env["subject_ids"].append(subject["id"])
     code = _unique("TSTR")
@@ -301,9 +313,7 @@ def test_admin_roster_matches_mysql_registrations(
     training_env["section_ids"].append(section_body["id"])
 
     for username in training_env["student_usernames"]:
-        login = api.post(
-            "/auth/login", json={"username": username, "password": STUDENT_PASSWORD}
-        )
+        login = api.post("/auth/login", json={"username": username, "password": STUDENT_PASSWORD})
         assert login.status_code == 200, login.text
         headers = {"Authorization": f"Bearer {login.json()['accessToken']}"}
         registration = api.post(
@@ -315,9 +325,7 @@ def test_admin_roster_matches_mysql_registrations(
     assert roster.status_code == 200, roster.text
     body = roster.json()
     assert body["currentEnrollment"] == 2
-    assert {item["studentCode"] for item in body["items"]} == set(
-        training_env["student_codes"]
-    )
+    assert {item["studentCode"] for item in body["items"]} == set(training_env["student_codes"])
 
     with db_engine.connect() as connection:
         registration_count = connection.execute(

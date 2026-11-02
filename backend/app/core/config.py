@@ -31,6 +31,8 @@ class Settings(BaseSettings):
 
     cors_origins: list[str] = ["http://localhost:3000", "http://localhost:5173"]
     timezone: str = "Asia/Ho_Chi_Minh"  # +07:00
+    receipt_logo_path: str | None = None
+    receipt_font_path: str | None = None
 
     @model_validator(mode="after")
     def validate_credit_limits_and_database_url(self) -> "Settings":
