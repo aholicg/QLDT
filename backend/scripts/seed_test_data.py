@@ -184,9 +184,7 @@ def _get_or_create_lecturer(db: Session, user: User, spec: AccountSpec) -> Lectu
 
 
 def _get_or_create_student(db: Session, user: User, spec: AccountSpec) -> Student:
-    student = db.scalars(
-        select(Student).where(Student.student_code == spec.profile_code)
-    ).first()
+    student = db.scalars(select(Student).where(Student.student_code == spec.profile_code)).first()
     if student is None:
         student = Student(
             user_id=user.id,
@@ -286,10 +284,11 @@ def _assert_no_conflicts(sections: list[CourseSection]) -> None:
                 continue
             if first.day_of_week != second.day_of_week:
                 continue
-            week_overlap = first.start_week <= second.end_week and second.start_week <= first.end_week
+            week_overlap = (
+                first.start_week <= second.end_week and second.start_week <= first.end_week
+            )
             period_overlap = (
-                first.start_period <= second.end_period
-                and second.start_period <= first.end_period
+                first.start_period <= second.end_period and second.start_period <= first.end_period
             )
             if not (week_overlap and period_overlap):
                 continue
@@ -376,9 +375,7 @@ def seed(db: Session) -> dict[str, int]:
 
     sections: dict[str, CourseSection] = {}
     for spec in SECTIONS:
-        sections[spec.code] = _get_or_create_section(
-            db, spec, subjects, lecturers, rooms, semester
-        )
+        sections[spec.code] = _get_or_create_section(db, spec, subjects, lecturers, rooms, semester)
 
     for student_code, section_codes in REGISTRATIONS.items():
         for section_code in section_codes:
@@ -404,9 +401,7 @@ def print_summary(summary: dict[str, int], semester: Semester | None = None) -> 
         print(f"  Học kỳ: {semester.semester_code} ({semester.name})")
     print(
         "  Phòng: {rooms} · Môn: {subjects} · Giảng viên: {lecturers} · "
-        "Sinh viên: {students} · Lớp: {sections} · Đăng ký: {registrations}".format(
-            **summary
-        )
+        "Sinh viên: {students} · Lớp: {sections} · Đăng ký: {registrations}".format(**summary)
     )
     print("  Tài khoản: admin/admin (có sẵn), testgv001/123456, testsv001/123456")
     print("  Lớp đầy: TST-S03 (sĩ số 1). Lớp trống: TST-S05. Lớp nhiều sinh viên: TST-S01.")

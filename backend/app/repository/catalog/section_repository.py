@@ -125,21 +125,88 @@ class SectionRepository(BaseRepository):
         end_period: int,
         start_week: int,
         end_week: int,
+        target_section_code: str = "__TARGET__",
         exclude_section_id: int | None = None,
     ) -> list[CourseSection]:
         """Tìm lớp giao thời gian trong cùng học kỳ, trùng phòng hoặc giảng viên."""
-        stmt = select(CourseSection).where(
-            CourseSection.semester_id == semester_id,
-            CourseSection.day_of_week == day_of_week,
-            CourseSection.start_period <= end_period,
-            CourseSection.end_period >= start_period,
-            CourseSection.start_week <= end_week,
-            CourseSection.end_week >= start_week,
-            or_(CourseSection.room_id == room_id, CourseSection.lecturer_id == lecturer_id),
+        return [
+            section
+            for section, _ in self.find_room_or_lecturer_conflict_details(
+                semester_id=semester_id,
+                room_id=room_id,
+                lecturer_id=lecturer_id,
+                day_of_week=day_of_week,
+                start_period=start_period,
+                end_period=end_period,
+                start_week=start_week,
+                end_week=end_week,
+                target_section_code=target_section_code,
+                exclude_section_id=exclude_section_id,
+            )
+        ]
+
+    def find_room_or_lecturer_conflict_details(
+        self,
+        *,
+        semester_id: int,
+        room_id: int,
+        lecturer_id: int,
+        day_of_week: int,
+        start_period: int,
+        end_period: int,
+        start_week: int,
+        end_week: int,
+        target_section_code: str = "__TARGET__",
+        exclude_section_id: int | None = None,
+    ) -> list[tuple[CourseSection, dict]]:
+        stmt = (
+            select(CourseSection)
+            .options(joinedload(CourseSection.subject))
+            .where(
+                CourseSection.semester_id == semester_id,
+                CourseSection.day_of_week == day_of_week,
+                or_(CourseSection.room_id == room_id, CourseSection.lecturer_id == lecturer_id),
+            )
         )
         if exclude_section_id is not None:
             stmt = stmt.where(CourseSection.id != exclude_section_id)
-        return list(self.db.scalars(stmt).all())
+        candidates = list(self.db.scalars(stmt).all())
+        if not candidates:
+            return []
+
+        from app.service.timetable.conflict_engine import find_conflicts
+
+        target = {
+            "sectionCode": target_section_code,
+            "dayOfWeek": day_of_week,
+            "startPeriod": start_period,
+            "endPeriod": end_period,
+            "startWeek": start_week,
+            "endWeek": end_week,
+            "roomId": room_id,
+            "lecturerId": lecturer_id,
+        }
+        conflicts = find_conflicts([target, *candidates])
+        if not conflicts:
+            return []
+
+        by_code = {section.section_code: section for section in candidates}
+        return [
+            (
+                by_code[conflict["sectionB"]],
+                {
+                    **conflict,
+                    "sectionA": conflict["sectionA"],
+                    "sectionB": (
+                        by_code[conflict["sectionB"]].section_code
+                        if conflict["sectionB"] != target_section_code
+                        else None
+                    ),
+                },
+            )
+            for conflict in conflicts
+            if conflict["sectionA"] == target_section_code and conflict["sectionB"] in by_code
+        ]
 
     def increment_enrollment_if_available(self, section_id: int) -> bool:
         """UPDATE ... SET current_enrollment = current_enrollment + 1

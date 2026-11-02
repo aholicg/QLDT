@@ -23,6 +23,31 @@ class RegistrationService:
         self.sections = SectionRepository(db)
         self.registrations = RegistrationRepository(db)
 
+    def _sync_tuition_invoice_after_change(self, student_id: int, semester_id: int) -> None:
+        from app.repository.catalog.semester_repository import SemesterRepository
+        from app.repository.tuition.tuition_repository import TuitionRepository
+
+        tuition_repo = TuitionRepository(self.db)
+        inv = tuition_repo.get_invoice_by_student_semester_for_update(student_id, semester_id)
+        if inv is not None:
+            if inv.amount_paid == 0:
+                rates = tuition_repo.list_rates(semester_id)
+                if rates:
+                    from app.service.tuition.tuition_service import TuitionService
+
+                    student = self.students.get_by_id(student_id)
+                    semester = SemesterRepository(self.db).get_by_id(semester_id)
+                    subj_map = tuition_repo.get_registered_students_and_subjects(
+                        semester_id, student_id
+                    )
+                    subjects = subj_map.get(student_id, [])
+                    if student and semester:
+                        TuitionService(self.db).generate_single_invoice(
+                            student, semester, rates, subjects
+                        )
+            else:
+                inv.is_stale = True
+
     def register(self, user: User, request: RegisterRequest) -> RegistrationDto:
         student = self.students.get_by_user_id_for_update(user.id)
         if student is None:
@@ -71,6 +96,7 @@ class RegistrationService:
         registration = self.registrations.add(
             RegistrationEntity(student_id=student.id, section_id=section.id)
         )
+        self._sync_tuition_invoice_after_change(student.id, section.semester_id)
         self.db.commit()
         loaded_registration = self.registrations.get_by_id(registration.id)
         result = RegistrationDto.model_validate(loaded_registration)
@@ -110,6 +136,7 @@ class RegistrationService:
 
         self.registrations.delete(registration)
         self.sections.decrement_enrollment(section.id)
+        self._sync_tuition_invoice_after_change(student.id, section.semester_id)
         self.db.commit()
 
     def list_mine(self, user: User, semester_id: int) -> ItemList[RegistrationDto]:

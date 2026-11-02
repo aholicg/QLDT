@@ -21,7 +21,15 @@ Branch on `error`; never use localized `message` as program logic. Do not expose
 | `SECTION_HAS_REGISTRATIONS` | 409 | Prevent delete completion and explain the section has registrations. |
 | `SUBJECT_HAS_SECTIONS` | 409 | Prevent delete completion and explain the subject has sections. |
 | `INVALID_WEEK` | 400 | Show week validation and return to a valid/current week when known. |
+| `TUITION_RATE_NOT_FOUND` | 404 | Do not generate an invoice without an applicable rate; ask an administrator to configure one. |
+| `INVOICE_NOT_FOUND` | 404 | Show that the requested invoice or receipt was not found. |
+| `INVOICE_ALREADY_PAID` | 409 | Do not submit another payment; refetch invoice and receipts. |
+| `PAYMENT_EXCEEDS_BALANCE` | 409 | Keep the payment form open and show the remaining invoice/installment balance. |
+| `INVOICE_HAS_PAYMENTS` | 409 | Prevent recalculation or installment changes after payment exists. |
+| `INSTALLMENT_SUM_MISMATCH` | 400 | Correct the installment percentages/amounts before saving. |
+| `DISCOUNT_EXCEEDS_TOTAL` | 400 | Correct discount configuration; invoice amount cannot become negative. |
+| `INVOICE_CANCELLED` | 409 | Do not accept payment for a cancelled invoice. |
 | HTTP 404 | 404 | Show item/page not found and offer return to list. |
 | HTTP 500/unknown | 500/other | Generic retryable message; no technical details. |
 
-The status for `ACCOUNT_LOCKED` and exact `details[]` shape must be confirmed against OpenAPI; the table does not override the contract.
+The status for `ACCOUNT_LOCKED` and exact `details[]` shape must be confirmed against OpenAPI; the table does not override the contract. Payment idempotency is scoped to the authenticated student and key.

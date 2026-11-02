@@ -68,13 +68,37 @@ class RegistrationRepository(BaseRepository):
                 CourseSection.semester_id == section.semester_id,
                 CourseSection.id != section.id,
                 CourseSection.day_of_week == section.day_of_week,
-                CourseSection.start_period <= section.end_period,
-                CourseSection.end_period >= section.start_period,
-                CourseSection.start_week <= section.end_week,
-                CourseSection.end_week >= section.start_week,
             )
         )
-        return list(self.db.scalars(stmt).all())
+        candidates = list(self.db.scalars(stmt).all())
+        if not candidates:
+            return []
+
+        from app.service.timetable.conflict_engine import find_conflicts
+
+        conflicts = find_conflicts(
+            [
+                {
+                    "sectionCode": slot.section_code,
+                    "dayOfWeek": slot.day_of_week,
+                    "startPeriod": slot.start_period,
+                    "endPeriod": slot.end_period,
+                    "startWeek": slot.start_week,
+                    "endWeek": slot.end_week,
+                }
+                for slot in [section, *candidates]
+            ]
+        )
+        if not conflicts:
+            return []
+
+        target_code = section.section_code
+        conflicting_codes = {
+            c["sectionA"] if c["sectionB"] == target_code else c["sectionB"]
+            for c in conflicts
+            if c["sectionA"] == target_code or c["sectionB"] == target_code
+        }
+        return [c for c in candidates if c.section_code in conflicting_codes]
 
     def total_credits(self, student_id: int, semester_id: int) -> int:
         stmt = (
