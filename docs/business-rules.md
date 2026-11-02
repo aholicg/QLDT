@@ -10,5 +10,14 @@
 - Cancellation deletes the registration and decrements count in one backend transaction; students can only cancel their own registrations.
 - Lecturers only access sections they teach. ADMIN manages subjects/sections and can view rosters.
 - A subject with sections cannot be deleted; a section with registrations cannot be deleted.
+- Lecturers can record attendance, enter grades, and export reports only for sections they teach.
+- Attendance is recorded once per enrolled student and scheduled class date. The date must match
+  the section's weekday and teaching-week range; statuses are `PRESENT`, `ABSENT`, `LATE`, or `EXCUSED`.
+- ADMIN configures 1–10 grade components per section. Component weights must total exactly 100%;
+  each component defines its maximum score. The configuration is locked after the first grade is saved.
+- Final grades are calculated only after every component is entered, normalized to 10, weighted,
+  and rounded to the nearest 0.5 with midpoint ties rounded upward.
+- Academic records are retained when registrations change; a section with attendance or grade
+  configuration cannot be deleted.
 - `GET /api/sections` returns `remainingSeats`, `full`, and `registeredByMe`; these drive UI state but backend remains authoritative under concurrent requests.
 - Frontend refreshes relevant server data after every successful write.

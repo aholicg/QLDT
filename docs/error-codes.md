@@ -19,6 +19,8 @@ Branch on `error`; never use localized `message` as program logic. Do not expose
 | `SCHEDULE_CONFLICT` | 409 | Show backend details in section form; do not parse `message` for logic. |
 | `CAPACITY_BELOW_ENROLLMENT` | 409 | Keep edit form open and identify capacity field when details allow. |
 | `SECTION_HAS_REGISTRATIONS` | 409 | Prevent delete completion and explain the section has registrations. |
+| `SECTION_HAS_ACADEMIC_RECORDS` | 409 | Prevent deleting a section that has attendance or grade configuration/history. |
+| `GRADE_COMPONENTS_LOCKED` | 409 | Explain grade columns cannot change after scores have been entered. |
 | `SUBJECT_HAS_SECTIONS` | 409 | Prevent delete completion and explain the subject has sections. |
 | `INVALID_WEEK` | 400 | Show week validation and return to a valid/current week when known. |
 | HTTP 404 | 404 | Show item/page not found and offer return to list. |

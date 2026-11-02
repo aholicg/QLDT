@@ -350,9 +350,7 @@ def test_section_rejects_duplicate_code_and_invalid_values(client, training_worl
 
     bad_period = client.post(
         "/api/sections",
-        json=_section_payload(
-            training_world, "TST-S203", startPeriod=5, endPeriod=3, dayOfWeek=7
-        ),
+        json=_section_payload(training_world, "TST-S203", startPeriod=5, endPeriod=3, dayOfWeek=7),
         headers=admin,
     )
     assert bad_period.status_code == 400
@@ -580,9 +578,7 @@ def test_admin_roster_access_and_payload(client, training_world):
     student = client.get(f"/api/sections/{section['id']}/students", headers=_student(client))
     assert student.status_code == 403
 
-    assert (
-        client.get("/api/sections/999999/students", headers=admin).status_code == 404
-    )
+    assert client.get("/api/sections/999999/students", headers=admin).status_code == 404
 
 
 def test_registration_does_not_require_prerequisite_or_corequisite(client, training_world):
@@ -655,7 +651,9 @@ def test_contract_and_database_schema_have_no_prerequisite_or_corequisite(client
     assert "sectionId" in register_properties
 
     schema_sql = (
-        Path(__file__).resolve().parents[2] / "db" / "schema.sql"
-    ).read_text(encoding="utf-8").lower()
+        (Path(__file__).resolve().parents[2] / "db" / "schema.sql")
+        .read_text(encoding="utf-8")
+        .lower()
+    )
     assert "prerequisite" not in schema_sql
     assert "corequisite" not in schema_sql

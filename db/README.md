@@ -6,6 +6,10 @@ Database source is organized here:
 - `seed/seed.sql`: sample accounts and academic data.
 - `../backend/migrations/`: Alembic migrations used by the API and CI; keep them aligned with this canonical SQL schema.
 
+The schema has 11 tables, including `ATTENDANCE_RECORDS`, `SECTION_GRADE_COMPONENTS`, and
+`STUDENT_GRADES` for UC010. Grade components are scoped to a course section so their weights can
+vary by semester/year.
+
 Requires MySQL 8.0.16 or later. These SQL files are the canonical full sample database path.
 On a new, empty database, load the schema and then the seed:
 

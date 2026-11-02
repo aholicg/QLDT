@@ -40,5 +40,10 @@ Quy ước này được cập nhật sau tài liệu thiết kế và được 
 | `GET /api/students/me/timetable` | Thời khóa biểu sinh viên, query `semesterId`, `week` |
 | `GET /api/lecturers/me/timetable` | Lịch giảng viên, query `semesterId`, `week` |
 | `GET /api/lecturers/me/sections` | Lớp của giảng viên hiện tại |
+| `GET/PUT /api/sections/{id}/attendance` | Điểm danh theo ngày học; giảng viên phụ trách lớp |
+| `GET/PUT /api/sections/{id}/grades` | Xem/lưu bảng điểm; giảng viên phụ trách lớp |
+| `GET/PUT /api/sections/{id}/grade-components` | ADMIN xem/cấu hình cột điểm theo lớp |
+| `GET /api/sections/{id}/exports/attendance` | Xuất điểm danh Excel; giảng viên phụ trách lớp |
+| `GET /api/sections/{id}/exports/grades` | Xuất bảng điểm Excel; giảng viên phụ trách lớp |
 
 `GET /api/sections` trả `remainingSeats`, `full`, `registeredByMe`. Request/response schemas, verbs CRUD còn thiếu phải đọc từ OpenAPI, không suy đoán.

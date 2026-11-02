@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from app.controller.auth import auth_controller
 from app.controller.catalog import section_controller, semester_controller, subject_controller
-from app.controller.registration import registration_controller
+from app.controller.registration import academic_records_controller, registration_controller
 from app.controller.timetable import timetable_controller
 from app.dto.common import ErrorResponse
 
@@ -21,6 +21,7 @@ for _module in (
     subject_controller,
     section_controller,
     registration_controller,
+    academic_records_controller,
     timetable_controller,
 ):
     api_router.include_router(_module.router)

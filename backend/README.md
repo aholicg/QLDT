@@ -76,6 +76,7 @@ All UC001-UC009 business services are fully implemented and verified with automa
 - Course Registration & Cancellation (UC005, UC006): Per-student row locking (SELECT ... FOR UPDATE), atomic capacity updates, and semester credit limit enforcement. Prerequisite and corequisite checks are excluded.
 - Timetable (UC007, UC008): Weekly schedule calculation for students and lecturers.
 - Single Registration Semester: All services operate against a single active semester (2026.1); query parameters default to this active semester if omitted.
+- Academic records (UC010): assigned lecturers record attendance by scheduled class date, enter component grades, and export attendance/gradebook workbooks. ADMIN configures section-specific grade columns; final grades use weighted normalization to 10 and nearest-0.5 rounding.
 
 Tests and static checks (pytest, ruff check, alembic check) pass completely.
 

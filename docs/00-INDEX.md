@@ -6,6 +6,7 @@ Start here and read only the material needed for the task.
 |---|---|
 | System scope and actors | `specs/srs/01-overview.md`, `specs/srs/02-actors.md` |
 | A use case | Matching `specs/srs/ucNNN.md`, then `api-conventions.md` and `traceability.md` |
+| Attendance, grades, or academic exports | `specs/srs/uc010.md`, `business-rules.md`, `error-codes.md`, `../contracts/openapi.yaml` |
 | Frontend/API integration | `api-conventions.md`, `naming-map.md`, `error-codes.md`, `../contracts/openapi.yaml` |
 | Registration behavior | `business-rules.md`, `error-codes.md`, UC005/UC006 |
 | Timetable | UC007/UC008, `business-rules.md`, open questions |

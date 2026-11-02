@@ -9,3 +9,4 @@ bcrypt>=5.0.0
 PyMySQL>=1.2.3
 cryptography>=50.0.2        # PyMySQL cần cho MySQL 8 (caching_sha2_password)
 tzdata>=2026.5          # Windows không có sẵn CSDL múi giờ cho zoneinfo
+openpyxl>=3.1,<4.0      # Xuất file Excel (.xlsx) cho danh sách điểm danh / bảng điểm

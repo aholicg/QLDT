@@ -6,8 +6,8 @@
 | Period-to-time conversion | Timetables use periods 1-12, but no official period clock table was supplied. | Open: show period numbers until the academic schedule is provided. |
 | Pagination | Subjects and sections use `page`, `size`, `sort`; roster pagination was not specified. | Partially resolved: paginate subjects/sections; confirm roster behavior from OpenAPI. |
 | Semester credit limits | The implementation defaults to minimum 12 and maximum 24 credits, configurable system-wide with environment variables. | Temporary values only; the group must confirm the actual minimum and maximum. |
-| Prerequisite/co-requisite subjects | Not checked. The schema has no grades table. | Team decision: keep both rules out of scope. Revisit only if the scope/schema changes. |
+| Prerequisite/co-requisite subjects | Not checked; the gradebook stores course-section grade components, not academic history needed to determine prerequisites. | Keep both rules out of scope unless prerequisite data and requirements are added. |
 
-Additional FE integration blockers: add `contracts/openapi.yaml`; confirm login response/`/auth/me` shape, details schema, atomic change-class UX, and timetable period boundary semantics.
+Remaining design questions: confirm timetable period boundary semantics and whether additional grade-letter/pass/fail conversions are required.
 
-FE-BE field-name differences observed while implementing registration: backend DTOs expose `id` for registrations, sections, and semesters, while the frontend pages currently read `registrationId`, `sectionId`, and `semesterId`. The contract is not yet available, so the implementation does not rename these fields; reconcile the DTOs and FE adapters against the reviewed OpenAPI contract before end-to-end integration.
+FE-BE field names must continue to follow the current OpenAPI contract and shared TypeScript types.

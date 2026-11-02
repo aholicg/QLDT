@@ -71,7 +71,9 @@ def main() -> None:
         if sem and subj and room and gv.lecturer:
             from app.entity.catalog.course_section import CourseSection
 
-            if not db.scalars(select(CourseSection).where(CourseSection.section_code == "150001")).first():
+            if not db.scalars(
+                select(CourseSection).where(CourseSection.section_code == "150001")
+            ).first():
                 db.add(
                     CourseSection(
                         section_code="150001",

@@ -1,6 +1,8 @@
 # QLDT — Quản lý và đăng ký học phần
 
 Dự án môn IT3180, Nhóm 20. Stack: React + TypeScript, FastAPI, MySQL.
+Chức năng hiện có gồm đăng ký học phần, quản trị lớp, thời khóa biểu, điểm danh, bảng điểm
+theo lớp và xuất báo cáo Excel cho giảng viên phụ trách.
 
 ## Chạy FE–BE–DB local (Windows)
 

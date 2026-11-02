@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import { Alert, App, Button, Card, Empty, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Spin, Table, Tag, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Section, SectionCreateRequest, SectionUpdateRequest, Subject, SubjectCreateRequest, SubjectUpdateRequest } from "../../shared/api/api-types";
 import { readApiError } from "../../shared/api/client";
+import GradeComponentsConfigModal from "./GradeComponentsConfigModal";
 import { createSection, createSubject, deleteSection, deleteSubject, fetchCurrentSemester, fetchLookups, fetchSections, fetchSubjects, updateSection, updateSubject } from "./catalogApi";
 
 const PAGE_SIZE = 10;
@@ -26,10 +27,17 @@ export default function AdminCatalogPage({ resource }: { resource: "subjects" | 
   const [sectionModalOpen, setSectionModalOpen] = useState(false);
   const [subjectEditor, setSubjectEditor] = useState<Subject>();
   const [sectionEditor, setSectionEditor] = useState<Section>();
+  const [gradeConfigSection, setGradeConfigSection] = useState<Section>();
 
   const lookupsQuery = useQuery({ queryKey: ["catalog", "lookups"], queryFn: fetchLookups, enabled: !isSubjects });
   const currentSemesterQuery = useQuery({ queryKey: ["semesters", "current"], queryFn: fetchCurrentSemester, enabled: !isSubjects });
-  const semesterId = currentSemesterQuery.data?.id;
+  const [selectedSemesterId, setSelectedSemesterId] = useState<number>();
+  const semesterId = selectedSemesterId ?? currentSemesterQuery.data?.id;
+  useEffect(() => {
+    if (selectedSemesterId === undefined && currentSemesterQuery.data) {
+      setSelectedSemesterId(currentSemesterQuery.data.id);
+    }
+  }, [currentSemesterQuery.data, selectedSemesterId]);
   const subjectsQuery = useQuery({
     queryKey: ["subjects", page, keyword],
     enabled: isSubjects,
@@ -69,7 +77,7 @@ export default function AdminCatalogPage({ resource }: { resource: "subjects" | 
     { title: "Phòng", key: "room", render: (_, row) => <Tag color="blue">{row.room.roomCode}</Tag> },
     { title: "Lịch", key: "schedule", render: (_, row) => `Thứ ${row.dayOfWeek} · Tiết ${row.startPeriod}-${row.endPeriod} · Tuần ${row.startWeek}-${row.endWeek}` },
     { title: "Sĩ số", key: "capacity", width: 90, render: (_, row) => `${row.currentEnrollment}/${row.maxCapacity}` },
-    { title: "Thao tác", key: "actions", width: 150, render: (_, row) => <Space><Button size="small" onClick={() => { setSectionEditor(row); setSectionModalOpen(true); }}>Sửa</Button><Popconfirm title="Xóa lớp học phần?" description={row.currentEnrollment ? "Lớp đã có đăng ký nên backend có thể từ chối thao tác này." : undefined} okText="Xóa" cancelText="Hủy" onConfirm={() => sectionDeleteMutation.mutateAsync(row.id)}><Button danger size="small">Xóa</Button></Popconfirm></Space> },
+    { title: "Thao tác", key: "actions", width: 250, render: (_, row) => <Space wrap><Button size="small" onClick={() => { setSectionEditor(row); setSectionModalOpen(true); }}>Sửa</Button><Button size="small" onClick={() => setGradeConfigSection(row)}>Cấu hình điểm</Button><Popconfirm title="Xóa lớp học phần?" description={row.currentEnrollment ? "Lớp đã có đăng ký nên backend có thể từ chối thao tác này." : undefined} okText="Xóa" cancelText="Hủy" onConfirm={() => sectionDeleteMutation.mutateAsync(row.id)}><Button danger size="small">Xóa</Button></Popconfirm></Space> },
   ];
 
   const sectionInitialValues: Partial<SectionCreateRequest> = sectionEditor ? {
@@ -99,6 +107,7 @@ export default function AdminCatalogPage({ resource }: { resource: "subjects" | 
       {(query.isError || (!isSubjects && lookupsQuery.isError)) && <Alert type="error" showIcon message="Không tải được danh mục." action={<Button size="small" onClick={() => void query.refetch()}>Thử lại</Button>} />}
       <Card className="admin-catalog-table" styles={{ body: { padding: 0 } }}>
         <div className="admin-catalog-toolbar" style={{ padding: 16 }}>
+          {!isSubjects && <Select aria-label="Học kỳ" value={semesterId} options={(lookupsQuery.data?.semesters ?? []).map((semester) => ({ value: semester.id, label: `${semester.semesterCode} · ${semester.name}` }))} onChange={(value) => { setSelectedSemesterId(value); setPage(1); }} style={{ minWidth: 220 }} />}
           <Input.Search allowClear value={keyword} placeholder={isSubjects ? "Tìm mã hoặc tên môn học" : "Tìm mã lớp hoặc môn học"} onChange={(event) => { setKeyword(event.target.value); setPage(1); }} aria-label="Tìm trong danh mục" />
           <Button type="primary" icon={<PlusOutlined />} onClick={() => { if (isSubjects) { setSubjectEditor(undefined); setSubjectModalOpen(true); } else { setSectionEditor(undefined); setSectionModalOpen(true); } }}>{isSubjects ? "Thêm môn học" : "Mở lớp học phần"}</Button>
         </div>
@@ -147,6 +156,12 @@ export default function AdminCatalogPage({ resource }: { resource: "subjects" | 
           <Button type="primary" htmlType="submit" loading={busy} block>{sectionEditor ? "Lưu thay đổi" : "Tạo lớp học phần"}</Button>
         </Form>
       </Modal>
+      {gradeConfigSection && (
+        <GradeComponentsConfigModal
+          section={gradeConfigSection}
+          onClose={() => setGradeConfigSection(undefined)}
+        />
+      )}
     </div>
   );
 }

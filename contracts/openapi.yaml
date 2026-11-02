@@ -560,9 +560,11 @@ paths:
       parameters:
       - name: semesterId
         in: query
-        required: true
+        required: false
         schema:
-          type: integer
+          anyOf:
+          - type: integer
+          - type: 'null'
           title: Semesterid
       - name: subjectId
         in: query
@@ -1051,9 +1053,11 @@ paths:
       parameters:
       - name: semesterId
         in: query
-        required: true
+        required: false
         schema:
-          type: integer
+          anyOf:
+          - type: integer
+          - type: 'null'
           title: Semesterid
       responses:
         '200':
@@ -1152,6 +1156,70 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /api/registrations/{registration_id}/change:
+    put:
+      tags:
+      - registration
+      summary: Đổi lớp học phần (UC006 - Atomic Change)
+      operationId: change_section_api_registrations__registration_id__change_put
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: registration_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Registration Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeSectionRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Registration'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /api/students/me/timetable:
     get:
       tags:
@@ -1163,9 +1231,11 @@ paths:
       parameters:
       - name: semesterId
         in: query
-        required: true
+        required: false
         schema:
-          type: integer
+          anyOf:
+          - type: integer
+          - type: 'null'
           title: Semesterid
       - name: week
         in: query
@@ -1230,9 +1300,11 @@ paths:
       parameters:
       - name: semesterId
         in: query
-        required: true
+        required: false
         schema:
-          type: integer
+          anyOf:
+          - type: integer
+          - type: 'null'
           title: Semesterid
       - name: week
         in: query
@@ -1297,9 +1369,11 @@ paths:
       parameters:
       - name: semesterId
         in: query
-        required: true
+        required: false
         schema:
-          type: integer
+          anyOf:
+          - type: integer
+          - type: 'null'
           title: Semesterid
       responses:
         '200':
@@ -1308,6 +1382,496 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ItemList_Section_'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/sections/{section_id}/exports/grades:
+    get:
+      tags:
+      - academic-records
+      summary: Export Grades
+      operationId: export_grades_api_sections__section_id__exports_grades_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: section_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Section Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/sections/{section_id}/exports/attendance:
+    get:
+      tags:
+      - academic-records
+      summary: Export Attendance
+      operationId: export_attendance_api_sections__section_id__exports_attendance_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: section_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Section Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/sections/{section_id}/grade-components:
+    get:
+      tags:
+      - academic-records
+      summary: Get Grade Components
+      operationId: get_grade_components_api_sections__section_id__grade_components_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: section_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Section Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemList_GradeComponent_'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - academic-records
+      summary: Configure Grade Components
+      operationId: configure_grade_components_api_sections__section_id__grade_components_put
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: section_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Section Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GradeComponentsRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemList_GradeComponent_'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/sections/{section_id}/attendance:
+    get:
+      tags:
+      - academic-records
+      summary: Get Attendance
+      operationId: get_attendance_api_sections__section_id__attendance_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: section_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Section Id
+      - name: classDate
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Classdate
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendanceSheet'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - academic-records
+      summary: Save Attendance
+      operationId: save_attendance_api_sections__section_id__attendance_put
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: section_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Section Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttendanceUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendanceSheet'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/sections/{section_id}/grades:
+    get:
+      tags:
+      - academic-records
+      summary: Get Gradebook
+      operationId: get_gradebook_api_sections__section_id__grades_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: section_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Section Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GradeBook'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - academic-records
+      summary: Save Grades
+      operationId: save_grades_api_sections__section_id__grades_put
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: section_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Section Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GradeUpdateRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GradeBook'
         '400':
           content:
             application/json:
@@ -1366,6 +1930,15 @@ components:
       - expiresIn
       - user
       title: AuthResponse
+    ChangeSectionRequest:
+      properties:
+        newSectionId:
+          type: integer
+          title: Newsectionid
+      type: object
+      required:
+      - newSectionId
+      title: ChangeSectionRequest
     CurrentSemester:
       properties:
         id:
@@ -1918,8 +2491,7 @@ components:
       - endWeek
       - maxCapacity
       title: SectionUpdateRequest
-      description: Không có sectionCode. Nếu lớp đã có đăng ký, subjectId và semesterId
-        phải giữ nguyên.
+      description: Không có sectionCode. Nếu lớp đã có đăng ký, subjectId và semesterId phải giữ nguyên.
     Semester:
       properties:
         id:
@@ -2216,6 +2788,268 @@ components:
       - msg
       - type
       title: ValidationError
+    AttendanceEntry:
+      properties:
+        studentId:
+          type: integer
+          title: Studentid
+        studentCode:
+          type: string
+          title: Studentcode
+        fullName:
+          type: string
+          title: Fullname
+        email:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Email
+        status:
+          anyOf:
+          - $ref: '#/components/schemas/AttendanceStatus'
+          - type: 'null'
+      type: object
+      required:
+      - studentId
+      - studentCode
+      - fullName
+      - email
+      - status
+      title: AttendanceEntry
+    AttendanceSheet:
+      properties:
+        sectionId:
+          type: integer
+          title: Sectionid
+        sectionCode:
+          type: string
+          title: Sectioncode
+        classDate:
+          type: string
+          format: date
+          title: Classdate
+        scheduledDates:
+          items:
+            type: string
+            format: date
+          type: array
+          title: Scheduleddates
+        items:
+          items:
+            $ref: '#/components/schemas/AttendanceEntry'
+          type: array
+          title: Items
+      type: object
+      required:
+      - sectionId
+      - sectionCode
+      - classDate
+      - scheduledDates
+      - items
+      title: AttendanceSheet
+    AttendanceStatus:
+      type: string
+      enum:
+      - PRESENT
+      - ABSENT
+      - LATE
+      - EXCUSED
+      title: AttendanceStatus
+    AttendanceUpdateItem:
+      properties:
+        studentId:
+          type: integer
+          title: Studentid
+        status:
+          $ref: '#/components/schemas/AttendanceStatus'
+      type: object
+      required:
+      - studentId
+      - status
+      title: AttendanceUpdateItem
+    AttendanceUpdateRequest:
+      properties:
+        classDate:
+          type: string
+          format: date
+          title: Classdate
+        items:
+          items:
+            $ref: '#/components/schemas/AttendanceUpdateItem'
+          type: array
+          title: Items
+      type: object
+      required:
+      - classDate
+      - items
+      title: AttendanceUpdateRequest
+    GradeBook:
+      properties:
+        sectionId:
+          type: integer
+          title: Sectionid
+        sectionCode:
+          type: string
+          title: Sectioncode
+        components:
+          items:
+            $ref: '#/components/schemas/GradeComponent'
+          type: array
+          title: Components
+        items:
+          items:
+            $ref: '#/components/schemas/StudentGradeRow'
+          type: array
+          title: Items
+      type: object
+      required:
+      - sectionId
+      - sectionCode
+      - components
+      - items
+      title: GradeBook
+    GradeComponent:
+      properties:
+        id:
+          type: integer
+          title: Id
+        name:
+          type: string
+          title: Name
+        weightPercentage:
+          type: number
+          title: Weightpercentage
+        maxScore:
+          type: number
+          title: Maxscore
+        sortOrder:
+          type: integer
+          title: Sortorder
+      type: object
+      required:
+      - id
+      - name
+      - weightPercentage
+      - maxScore
+      - sortOrder
+      title: GradeComponent
+    GradeComponentInput:
+      properties:
+        name:
+          type: string
+          maxLength: 80
+          minLength: 1
+          title: Name
+        weightPercentage:
+          anyOf:
+          - type: number
+            maximum: 100.0
+            exclusiveMinimum: 0.0
+          - type: string
+          title: Weightpercentage
+        maxScore:
+          anyOf:
+          - type: number
+            maximum: 100.0
+            exclusiveMinimum: 0.0
+          - type: string
+          title: Maxscore
+      type: object
+      required:
+      - name
+      - weightPercentage
+      - maxScore
+      title: GradeComponentInput
+    GradeComponentsRequest:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/GradeComponentInput'
+          type: array
+          maxItems: 10
+          minItems: 1
+          title: Items
+      type: object
+      required:
+      - items
+      title: GradeComponentsRequest
+    GradeUpdateItem:
+      properties:
+        studentId:
+          type: integer
+          title: Studentid
+        scores:
+          additionalProperties:
+            anyOf:
+            - type: number
+            - type: string
+            - type: 'null'
+          type: object
+          title: Scores
+      type: object
+      required:
+      - studentId
+      - scores
+      title: GradeUpdateItem
+    GradeUpdateRequest:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/GradeUpdateItem'
+          type: array
+          title: Items
+      type: object
+      required:
+      - items
+      title: GradeUpdateRequest
+    ItemList_GradeComponent_:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/GradeComponent'
+          type: array
+          title: Items
+      type: object
+      required:
+      - items
+      title: ItemList[GradeComponent]
+    StudentGradeRow:
+      properties:
+        studentId:
+          type: integer
+          title: Studentid
+        studentCode:
+          type: string
+          title: Studentcode
+        fullName:
+          type: string
+          title: Fullname
+        email:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Email
+        scores:
+          additionalProperties:
+            anyOf:
+            - type: number
+            - type: 'null'
+          type: object
+          title: Scores
+        finalScore:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Finalscore
+      type: object
+      required:
+      - studentId
+      - studentCode
+      - fullName
+      - email
+      - scores
+      - finalScore
+      title: StudentGradeRow
   securitySchemes:
     HTTPBearer:
       type: http

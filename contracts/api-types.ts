@@ -228,6 +228,10 @@ export interface RegisterRequest {
   sectionId: number;
 }
 
+export interface ChangeSectionRequest {
+  newSectionId: number;
+}
+
 export interface Registration {
   id: number;
   registeredAt: string; // ISO 8601 with +07:00
@@ -259,4 +263,79 @@ export interface Timetable {
   weekStartDate: string; // YYYY-MM-DD
   weekEndDate: string; // YYYY-MM-DD
   items: TimetableItem[];
+}
+
+// ==========================================
+// 8. Attendance and gradebook
+// ==========================================
+
+export type AttendanceStatus = "PRESENT" | "ABSENT" | "LATE" | "EXCUSED";
+
+export interface AttendanceEntry {
+  studentId: number;
+  studentCode: string;
+  fullName: string;
+  email: string | null;
+  status: AttendanceStatus | null;
+}
+
+export interface AttendanceSheet {
+  sectionId: number;
+  sectionCode: string;
+  classDate: string;
+  scheduledDates: string[];
+  items: AttendanceEntry[];
+}
+
+export interface AttendanceUpdateItem {
+  studentId: number;
+  status: AttendanceStatus;
+}
+
+export interface AttendanceUpdateRequest {
+  classDate: string;
+  items: AttendanceUpdateItem[];
+}
+
+export interface GradeComponent {
+  id: number;
+  name: string;
+  weightPercentage: number;
+  maxScore: number;
+  sortOrder: number;
+}
+
+export interface GradeComponentInput {
+  name: string;
+  weightPercentage: number;
+  maxScore: number;
+}
+
+export interface GradeComponentsRequest {
+  items: GradeComponentInput[];
+}
+
+export interface StudentGradeRow {
+  studentId: number;
+  studentCode: string;
+  fullName: string;
+  email: string | null;
+  scores: Record<number, number | null>;
+  finalScore: number | null;
+}
+
+export interface GradeBook {
+  sectionId: number;
+  sectionCode: string;
+  components: GradeComponent[];
+  items: StudentGradeRow[];
+}
+
+export interface GradeUpdateItem {
+  studentId: number;
+  scores: Record<number, number | null>;
+}
+
+export interface GradeUpdateRequest {
+  items: GradeUpdateItem[];
 }

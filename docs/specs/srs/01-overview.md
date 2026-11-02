@@ -9,7 +9,7 @@ QLDT là đồ án IT3180 của Nhóm 20, Trường CNTT&TT, Đại học Bách 
 - Client-server ba tầng: trình duyệt responsive, REST API trả JSON, cơ sở dữ liệu quan hệ.
 - Backend theo MVC phân tầng `View -> Controller -> Service -> Repository -> Entity`.
 - Module backend: `auth`, `catalog`, `registration`, `timetable`; package dùng chung `security`.
-- CSDL có 8 bảng: `USERS`, `STUDENTS`, `LECTURERS`, `SUBJECTS`, `SEMESTERS`, `ROOMS`, `COURSE_SECTIONS`, `REGISTRATIONS`.
+- CSDL có 11 bảng, gồm các bảng tài khoản, danh mục/lớp học phần, đăng ký, điểm danh và điểm thành phần; lược đồ chuẩn tại `db/schema.sql`.
 
 ## Bảo mật và tích hợp
 
