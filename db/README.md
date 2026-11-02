@@ -42,3 +42,14 @@ The seed now has exactly one ADMIN. Its password is `admin`; lecturer and studen
 The seed contains 1 admin, 10 lecturers, 1,000 students, 100 subjects, 1 active semester (`2026.1`, `semester_id = 1`), 30 rooms, and 400 sections in this single active registration semester. Registrations start empty and `current_enrollment` starts at 0. Student usernames use `sv` followed by student code.
 
 Do not expose password hashes to the client.
+
+### Dữ liệu mẫu học phí (Module Học phí & Biên lai)
+Dữ liệu khởi tạo cho học kỳ 2026.1 bao gồm:
+- Đơn giá học phí mẫu: 450.000 ₫/TCHP (chung) và 500.000 ₫/TCHP (khóa K66 ngành CNTT).
+- 3 đợt nộp học phí mẫu (tỷ lệ 50%, 30%, 20%).
+- Miễn giảm học phí mẫu cho tài khoản `sv20210001` (50%) và `sv20210002` (2.000.000 ₫).
+- Một số môn học có số tín chỉ học phí (TCHP) khác tín chỉ học tập (TC).
+
+*LƯU Ý QUAN TRỌNG: Mọi số liệu về đơn giá, tỷ lệ miễn giảm, hạn nộp học phí trong seed đều là **dữ liệu giả định (mock data)** nhằm mục đích kiểm thử và minh họa hệ thống, hoàn toàn không phải số liệu chính thức của nhà trường.*
+
+Đơn giá có `effective_from`/`effective_to`; khi tạo hóa đơn, backend chọn đơn giá phù hợp theo thời điểm bắt đầu học kỳ và mức đặc hiệu khóa/ngành. Thay đổi schema cần chạy Alembic migration `79e0a29b3c41` và `4a81f9032d76` (hoặc nạp lại schema SQL chuẩn cho database mẫu); không áp dụng migration lên database vừa tạo bằng `schema.sql` rồi đã `stamp head`.

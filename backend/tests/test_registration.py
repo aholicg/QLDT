@@ -187,16 +187,15 @@ def test_register_at_exact_credit_limit_is_allowed(db_session, registration_worl
     assert second.current_enrollment == 1
 
 
-def test_cancel_rejects_result_below_minimum(db_session, registration_world):
+def test_cancel_below_minimum_is_allowed(db_session, registration_world):
     section = registration_world["add_section"]("SEC-1", "SUB-1", 12)
     registration = _register(db_session, registration_world["student"], section)
 
-    with pytest.raises(AppError) as error:
-        RegistrationService(db_session).cancel(registration_world["student"], registration.id)
+    RegistrationService(db_session).cancel(registration_world["student"], registration.id)
 
     db_session.refresh(section)
-    assert error.value.code == ErrorCode.CREDIT_LIMIT_BELOW_MIN
-    assert section.current_enrollment == 1
+    assert section.current_enrollment == 0
+    assert db_session.get(RegistrationEntity, registration.id) is None
 
 
 def test_cancel_before_student_reaches_minimum_is_allowed(db_session, registration_world):

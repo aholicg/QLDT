@@ -28,6 +28,16 @@ class ErrorCode(str, Enum):
     CREDIT_LIMIT_BELOW_MIN = "CREDIT_LIMIT_BELOW_MIN"
     INTERNAL_ERROR = "INTERNAL_ERROR"
 
+    # Module Học phí & Biên lai điện tử
+    TUITION_RATE_NOT_FOUND = "TUITION_RATE_NOT_FOUND"
+    INVOICE_NOT_FOUND = "INVOICE_NOT_FOUND"
+    INVOICE_ALREADY_PAID = "INVOICE_ALREADY_PAID"
+    PAYMENT_EXCEEDS_BALANCE = "PAYMENT_EXCEEDS_BALANCE"
+    INVOICE_HAS_PAYMENTS = "INVOICE_HAS_PAYMENTS"
+    INSTALLMENT_SUM_MISMATCH = "INSTALLMENT_SUM_MISMATCH"
+    DISCOUNT_EXCEEDS_TOTAL = "DISCOUNT_EXCEEDS_TOTAL"
+    INVOICE_CANCELLED = "INVOICE_CANCELLED"
+
 
 # mã lỗi -> (HTTP status, thông báo mặc định tiếng Việt)
 ERROR_SPECS: dict[ErrorCode, tuple[int, str]] = {
@@ -62,4 +72,18 @@ ERROR_SPECS: dict[ErrorCode, tuple[int, str]] = {
         "Không thể hủy vì số tín chỉ sẽ thấp hơn mức tối thiểu",
     ),
     ErrorCode.INTERNAL_ERROR: (500, "Hệ thống đang gặp lỗi, vui lòng thử lại sau"),
+    ErrorCode.TUITION_RATE_NOT_FOUND: (404, "Không tìm thấy đơn giá học phí áp dụng"),
+    ErrorCode.INVOICE_NOT_FOUND: (404, "Không tìm thấy hóa đơn học phí"),
+    ErrorCode.INVOICE_ALREADY_PAID: (409, "Hóa đơn học phí đã được thanh toán đầy đủ"),
+    ErrorCode.PAYMENT_EXCEEDS_BALANCE: (409, "Số tiền thanh toán vượt quá số tiền còn thiếu"),
+    ErrorCode.INVOICE_HAS_PAYMENTS: (
+        409,
+        "Hóa đơn đã có giao dịch thanh toán, không thể tính lại hoặc xóa",
+    ),
+    ErrorCode.INSTALLMENT_SUM_MISMATCH: (
+        400,
+        "Tổng tỷ lệ hoặc số tiền các đợt không khớp với số phải nộp",
+    ),
+    ErrorCode.DISCOUNT_EXCEEDS_TOTAL: (400, "Số tiền miễn giảm vượt quá tổng học phí"),
+    ErrorCode.INVOICE_CANCELLED: (409, "Hóa đơn học phí đã bị hủy"),
 }

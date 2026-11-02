@@ -12,5 +12,7 @@
 | UC008 Lecturer timetable | `/semesters/current`, `/lecturers/me/timetable`, `/lecturers/me/sections` | `/app/timetable`, `/app/sections` | Backend timetable and lecturer section services implemented and covered by tests. |
 | UC009 Lecturer roster | `/lecturers/me/sections`, `/sections/{id}/students` | `/app/sections/:sectionId/students` | Backend roster service enforces lecturer ownership and is covered by tests. |
 | UC010 Attendance, gradebook, and Excel export | `/sections/{id}/attendance`, `/sections/{id}/grades`, `/sections/{id}/grade-components`, `/sections/{id}/exports/*` | `/app/sections/:sectionId/students` (lecturer tabs); `/app/sections` (admin grade setup) | SQLite API tests cover assigned-lecturer access, scheduled-day validation, attendance save/export, weighted grading, rounding, configuration locking, and grade export. |
+| Timetable conflict API/admin schedule validation | `POST /timetable/check`, `POST/PUT /sections` | Not changed in this task | Structured STUDENT/ROOM/LECTURER conflicts include overlapping periods/weeks; backend tests cover interval boundaries and students affected by schedule edits. |
+| Tuition invoices, payments and receipts | `/tuition/me`, `/tuition/me/payments`, `/receipts/*`, `/admin/tuition/*` | Not changed in this task | Backend API/calculation tests cover access control, invoice generation, discounts, installments, payment idempotency and PDF receipts. |
 
 Frontend paths reflect the current app routes; API paths are relative to `/api`.

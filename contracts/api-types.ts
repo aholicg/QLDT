@@ -13,6 +13,13 @@ export type AccountStatus = "ACTIVE" | "LOCKED";
 export interface FieldError {
   field: string;
   message: string;
+  type?: "STUDENT" | "ROOM" | "LECTURER" | null;
+  sectionA?: string;
+  sectionB?: string;
+  studentCode?: string;
+  dayOfWeek?: number;
+  periods?: ConflictRange;
+  weeks?: ConflictRange;
 }
 
 export interface ErrorResponse {
@@ -338,4 +345,212 @@ export interface GradeUpdateItem {
 
 export interface GradeUpdateRequest {
   items: GradeUpdateItem[];
+export interface ConflictRange {
+  start: number;
+  end: number;
+}
+
+export interface ScheduleConflict {
+  type: "STUDENT" | "LECTURER" | "ROOM";
+  sectionA: string;
+  sectionB: string;
+  dayOfWeek: number;
+  periods: ConflictRange;
+  weeks: ConflictRange;
+  field?: string;
+  studentCode?: string;
+  message?: string;
+}
+
+export type Conflict = ScheduleConflict;
+
+export interface ScheduleSlot {
+  sectionCode?: string | null;
+  dayOfWeek: number;
+  startPeriod: number;
+  endPeriod: number;
+  startWeek?: number;
+  endWeek?: number;
+  roomId?: number | null;
+  lecturerId?: number | null;
+}
+
+export interface TimetableSuggestion {
+  [key: string]: unknown;
+}
+
+export interface TimetableSuggestions {
+  items: TimetableSuggestion[];
+}
+
+// ==========================================
+// 8. Tuition and Receipts
+// ==========================================
+
+export type InvoiceStatus = "UNPAID" | "PARTIALLY_PAID" | "PAID" | "CANCELLED";
+
+export interface TuitionRate {
+  id: number;
+  semesterId: number;
+  cohort: string | null;
+  major: string | null;
+  effectiveFrom: string;
+  effectiveTo: string | null;
+  pricePerCredit: number;
+  description: string | null;
+  createdAt: string;
+}
+
+export interface TuitionRateCreateRequest {
+  semesterId: number;
+  cohort?: string | null;
+  major?: string | null;
+  effectiveFrom?: string | null;
+  effectiveTo?: string | null;
+  pricePerCredit: number;
+  description?: string | null;
+}
+
+export type TuitionRateUpdateRequest = Omit<TuitionRateCreateRequest, "semesterId">;
+
+export interface TuitionDiscount {
+  id: number;
+  studentId: number;
+  studentCode: string | null;
+  studentName: string | null;
+  semesterId: number;
+  discountPercent: number;
+  fixedAmount: number;
+  reason: string;
+  grantedBy: string;
+  createdAt: string;
+}
+
+export interface TuitionDiscountCreateRequest {
+  studentId?: number | null;
+  studentCode?: string | null;
+  semesterId: number;
+  discountPercent?: number;
+  fixedAmount?: number;
+  reason: string;
+}
+
+export interface TuitionInstallment {
+  id: number;
+  semesterId: number;
+  installmentOrder: number;
+  name: string;
+  dueDate: string;
+  percentage: number | null;
+  fixedAmount: number | null;
+  allocatedAmount?: number | null;
+  status?: "PENDING" | "PAID" | "OVERDUE" | null;
+}
+
+export type TuitionInstallmentConfig =
+  | {
+      installmentOrder: number;
+      name: string;
+      dueDate: string;
+      percentage: number;
+      fixedAmount?: null;
+    }
+  | {
+      installmentOrder: number;
+      name: string;
+      dueDate: string;
+      percentage?: null;
+      fixedAmount: number;
+    };
+
+export interface TuitionInstallmentsPutRequest {
+  semesterId: number;
+  installments: TuitionInstallmentConfig[];
+}
+
+export interface TuitionInvoiceItem {
+  id: number;
+  subjectId: number;
+  subjectCode: string;
+  subjectName: string;
+  credits: number;
+  tuitionCredits: number;
+  pricePerCredit: number;
+  amount: number;
+}
+
+export interface TuitionPayment {
+  id: number;
+  amount: number;
+  idempotencyKey: string;
+  paymentMethod: string;
+  paidAt: string;
+  receiptNo: string | null;
+}
+
+export interface TuitionInvoice {
+  id: number;
+  studentId: number;
+  studentCode?: string | null;
+  studentName?: string | null;
+  cohort?: string | null;
+  major?: string | null;
+  semesterId: number;
+  semesterCode?: string | null;
+  totalTuition: number;
+  totalDiscount: number;
+  amountDue: number;
+  amountPaid: number;
+  balance: number;
+  status: InvoiceStatus;
+  isStale: boolean;
+  items?: TuitionInvoiceItem[];
+  discounts?: TuitionDiscount[];
+  installments?: TuitionInstallment[];
+  payments?: TuitionPayment[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaymentCreateRequest {
+  installmentId?: number | null;
+  amount: number;
+  idempotencyKey: string;
+}
+
+export interface Receipt {
+  id: number;
+  receiptNo: string;
+  paymentId: number;
+  studentId: number;
+  studentCode: string | null;
+  studentName: string | null;
+  invoiceId: number;
+  amount: number;
+  amountInWords: string | null;
+  issuedAt: string;
+  receiptData: Record<string, unknown>;
+}
+
+export interface InvoiceGenerateRequest {
+  semesterId: number;
+  studentId?: number | null;
+}
+
+export interface InvoiceGenerateResult {
+  totalGenerated: number;
+  totalSkipped: number;
+  message: string;
+}
+
+export interface TuitionSummary {
+  semesterId: number;
+  semesterCode: string | null;
+  totalInvoices: number;
+  totalAmountDue: number;
+  totalAmountPaid: number;
+  totalBalance: number;
+  paidCount: number;
+  partiallyPaidCount: number;
+  unpaidCount: number;
 }

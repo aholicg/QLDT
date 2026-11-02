@@ -1,8 +1,8 @@
-fastapi>=0.143.2,<1.0
-uvicorn[standard]>=0.30
+uvicorn[standard]>=0.54.0
+fastapi>=0.162.0,<1.0
 SQLAlchemy>=2.1.4,<2.2
 alembic>=1.13
-pydantic>=2.7,<3.0
+pydantic>=2.14.2,<3.0
 pydantic-settings>=2.3
 PyJWT>=2.15.1
 bcrypt>=5.0.0
@@ -10,3 +10,5 @@ PyMySQL>=1.2.3
 cryptography>=50.0.2        # PyMySQL cần cho MySQL 8 (caching_sha2_password)
 tzdata>=2026.5          # Windows không có sẵn CSDL múi giờ cho zoneinfo
 openpyxl>=3.1,<4.0      # Xuất file Excel (.xlsx) cho danh sách điểm danh / bảng điểm
+tzdata>=2026.6          # Windows không có sẵn CSDL múi giờ cho zoneinfo
+reportlab>=4.2,<5

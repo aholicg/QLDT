@@ -2633,3 +2633,33 @@ INSERT INTO COURSE_SECTIONS (section_id, section_code, subject_id, semester_id, 
   (399, '150399', 99, 1, 9, 24, 7, 10, 12, 1, 20, 50, 0),
   (400, '150400', 100, 1, 10, 19, 7, 10, 12, 1, 20, 30, 0);
 
+
+-- ---------------------------------------------------------------------
+-- Dữ liệu mẫu giả lập cho Module Học phí (học kỳ 2026.1)
+-- Lưu ý: Mọi con số ở đây là dữ liệu giả demo, không phải số liệu chính thức của trường.
+-- ---------------------------------------------------------------------
+
+-- Cập nhật một số môn học có số tín chỉ học phí (TCHP) khác số tín chỉ học tập (TC)
+UPDATE SUBJECTS SET tuition_credits = 4.5 WHERE subject_id = 1;
+UPDATE SUBJECTS SET tuition_credits = 3.5 WHERE subject_id = 3;
+UPDATE SUBJECTS SET tuition_credits = 5.0 WHERE subject_id = 4;
+
+-- Đơn giá học phí cho học kỳ 2026.1 (semester_id = 1)
+INSERT INTO TUITION_RATES (rate_id, semester_id, cohort, major, effective_from, effective_to, price_per_credit, description) VALUES
+  (1, 1, NULL, NULL, '2026-09-07', '2027-01-18', 450000, 'Đơn giá chuẩn học kỳ 2026.1 (dữ liệu giả)'),
+  (2, 1, 'K66', 'Công nghệ thông tin', '2026-09-07', '2027-01-18', 500000, 'Đơn giá chương trình CNTT K66 (dữ liệu giả)');
+
+-- Cấu hình 3 đợt nộp cho học kỳ 2026.1
+INSERT INTO TUITION_INSTALLMENTS (installment_id, semester_id, installment_order, name, due_date, percentage, fixed_amount) VALUES
+  (1, 1, 1, 'Đợt 1 - Tạm nộp đầu kỳ', '2026-10-15', 50.00, NULL),
+  (2, 1, 2, 'Đợt 2 - Quyết toán giữa kỳ', '2026-11-30', 30.00, NULL),
+  (3, 1, 3, 'Đợt 3 - Thu vét cuối kỳ', '2026-12-31', 20.00, NULL);
+
+-- Khởi tạo chuỗi biên lai cho học kỳ 2026.1
+INSERT INTO RECEIPT_SEQUENCES (semester_id, current_number) VALUES
+  (1, 0);
+
+-- Miễn giảm mẫu cho một số sinh viên (student_id = 1 là sv20210001, student_id = 2 là sv20210002)
+INSERT INTO TUITION_DISCOUNTS (discount_id, student_id, semester_id, discount_percent, fixed_amount, reason, granted_by) VALUES
+  (1, 1, 1, 50.00, 0, 'Học bổng khuyến khích học tập loại Giỏi (dữ liệu giả)', 'Phòng Đào tạo'),
+  (2, 2, 1, 0.00, 2000000, 'Hỗ trợ chi phí học tập hoàn cảnh khó khăn (dữ liệu giả)', 'Ban Giám hiệu');

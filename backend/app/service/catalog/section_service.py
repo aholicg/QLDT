@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.error_codes import ErrorCode
@@ -18,8 +19,10 @@ from app.dto.catalog.catalog import (
     Semester as SemesterDto,
 )
 from app.dto.common import Page, PageParams
+from app.entity.auth.student import Student
 from app.entity.auth.user import Role, User
 from app.entity.catalog.course_section import CourseSection
+from app.entity.registration.registration import Registration
 from app.repository.auth.user_repository import LecturerRepository, StudentRepository
 from app.repository.catalog.lookup_repository import LookupRepository
 from app.repository.catalog.section_repository import SectionRepository
@@ -49,12 +52,14 @@ class SectionService:
         semester_id: int,
         subject_id: int | None,
         keyword: str | None,
+        unit_keyword: str | None,
         paging: PageParams,
     ) -> Page[Section]:
         items, total = self.sections.search(
             semester_id=semester_id,
             subject_id=subject_id,
             keyword=keyword,
+            unit_keyword=unit_keyword,
             offset=paging.offset,
             limit=paging.size,
             sort=paging.sort,
@@ -148,7 +153,14 @@ class SectionService:
                 ],
             )
 
-        conflicts = self.sections.find_room_or_lecturer_conflicts(
+        self.db.execute(
+            select(lecturer.__class__).where(lecturer.__class__.id == lecturer.id).with_for_update()
+        )
+        self.db.execute(
+            select(room.__class__).where(room.__class__.id == room.id).with_for_update()
+        )
+
+        conflicts = self.sections.find_room_or_lecturer_conflict_details(
             semester_id=request.semester_id,
             room_id=request.room_id,
             lecturer_id=request.lecturer_id,
@@ -157,16 +169,16 @@ class SectionService:
             end_period=request.end_period,
             start_week=request.start_week,
             end_week=request.end_week,
+            target_section_code=request.section_code,
         )
         if conflicts:
-            conflict_details = []
-            for c in conflicts:
-                conflict_details.append(
-                    field_error(
-                        "roomId" if c.room_id == request.room_id else "lecturerId",
-                        f"Trùng lịch với lớp {c.section_code} ({c.subject.name if c.subject else ''})",
-                    )
-                )
+            conflict_details = [
+                {
+                    **detail,
+                    "field": "roomId" if detail["type"] == "ROOM" else "lecturerId",
+                }
+                for _, detail in conflicts
+            ]
             raise AppError(ErrorCode.SCHEDULE_CONFLICT, details=conflict_details)
 
         entity = CourseSection(
@@ -257,7 +269,14 @@ class SectionService:
                     message="Lớp học phần đã có sinh viên đăng ký, không thể đổi môn học hoặc học kỳ",
                 )
 
-        conflicts = self.sections.find_room_or_lecturer_conflicts(
+        self.db.execute(
+            select(lecturer.__class__).where(lecturer.__class__.id == lecturer.id).with_for_update()
+        )
+        self.db.execute(
+            select(room.__class__).where(room.__class__.id == room.id).with_for_update()
+        )
+
+        conflicts = self.sections.find_room_or_lecturer_conflict_details(
             semester_id=request.semester_id,
             room_id=request.room_id,
             lecturer_id=request.lecturer_id,
@@ -266,18 +285,71 @@ class SectionService:
             end_period=request.end_period,
             start_week=request.start_week,
             end_week=request.end_week,
+            target_section_code=entity.section_code,
             exclude_section_id=section_id,
         )
         if conflicts:
-            conflict_details = []
-            for c in conflicts:
-                conflict_details.append(
-                    field_error(
-                        "roomId" if c.room_id == request.room_id else "lecturerId",
-                        f"Trùng lịch với lớp {c.section_code} ({c.subject.name if c.subject else ''})",
-                    )
-                )
+            conflict_details = [
+                {
+                    **detail,
+                    "field": "roomId" if detail["type"] == "ROOM" else "lecturerId",
+                }
+                for _, detail in conflicts
+            ]
             raise AppError(ErrorCode.SCHEDULE_CONFLICT, details=conflict_details)
+
+        schedule_changed = (
+            request.day_of_week != entity.day_of_week
+            or request.start_period != entity.start_period
+            or request.end_period != entity.end_period
+            or request.start_week != entity.start_week
+            or request.end_week != entity.end_week
+        )
+        if schedule_changed and self.sections.count_registrations(section_id) > 0:
+            from app.service.timetable.conflict_engine import find_conflicts
+
+            stmt = (
+                select(Student.student_code, CourseSection)
+                .join(Registration, Registration.section_id == CourseSection.id)
+                .join(Student, Registration.student_id == Student.id)
+                .where(
+                    Registration.student_id.in_(
+                        select(Registration.student_id).where(Registration.section_id == entity.id)
+                    ),
+                    CourseSection.semester_id == request.semester_id,
+                    CourseSection.id != entity.id,
+                    CourseSection.day_of_week == request.day_of_week,
+                )
+            )
+            other_rows = self.db.execute(stmt).all()
+            if other_rows:
+                target_slot = {
+                    "sectionCode": entity.section_code,
+                    "dayOfWeek": request.day_of_week,
+                    "startPeriod": request.start_period,
+                    "endPeriod": request.end_period,
+                    "startWeek": request.start_week,
+                    "endWeek": request.end_week,
+                }
+                student_conflict_details = []
+                for student_code, other_section in other_rows:
+                    slot_conflicts = find_conflicts([target_slot, other_section])
+                    if slot_conflicts:
+                        student_conflict_details.extend(
+                            {
+                                **conflict,
+                                "field": "schedule",
+                                "studentCode": student_code,
+                                "message": (
+                                    f"[STUDENT] Sinh viên {student_code} bị trùng lịch giữa lớp "
+                                    f"{entity.section_code} và {other_section.section_code}"
+                                ),
+                                "type": "STUDENT",
+                            }
+                            for conflict in slot_conflicts
+                        )
+                if student_conflict_details:
+                    raise AppError(ErrorCode.SCHEDULE_CONFLICT, details=student_conflict_details)
 
         # Gán cả quan hệ (không chỉ FK id) để object trả về không bị cũ
         # (stale) khi session không tự expire/refresh sau khi đổi FK.

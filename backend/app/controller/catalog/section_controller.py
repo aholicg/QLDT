@@ -25,10 +25,11 @@ def list_sections(
     semester_id: int | None = Query(None, alias="semesterId"),
     subject_id: int | None = Query(None, alias="subjectId"),
     keyword: str | None = None,
+    unit_keyword: str | None = Query(None, alias="unitKeyword"),
 ):
     if semester_id is None:
         semester_id = SemesterService(db).get_current().id
-    return SectionService(db).list(user, semester_id, subject_id, keyword, paging)
+    return SectionService(db).list(user, semester_id, subject_id, keyword, unit_keyword, paging)
 
 
 # /lookups phải đứng TRƯỚC /{section_id}

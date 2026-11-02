@@ -21,6 +21,7 @@ export async function fetchSections(params: {
   page: number;
   size: number;
   keyword?: string;
+  unitKeyword?: string;
 }): Promise<Page<Section>> {
   return (await api.get<Page<Section>>("/sections", { params })).data;
 }

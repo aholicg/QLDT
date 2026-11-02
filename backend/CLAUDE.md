@@ -22,3 +22,7 @@ Focused regression tests:
 - `pytest tests/test_academic_records.py` — attendance, grade calculations, lecturer ownership, export content, and authentication.
 
 The concurrency race test uses SQLite for repeatable automated coverage. Validate locking behavior against MySQL when testing the MySQL deployment.
+- Business modules belong in `app/{controller,service,repository,entity,dto}/{auth,catalog,registration,timetable,tuition}`; shared configuration and errors belong in `app/core/`, and authentication helpers belong in `app/security/`.
+- Catalog, registration, roster, and timetable business services for UC002-UC009 are fully implemented with automated test coverage. Registration and cancellation enforce credit limits and atomic capacity updates.
+- Run and migration commands are documented in `README.md` and `backend/README.md`; CI also builds and smoke-tests the Compose gateway stack.
+- `contracts/openapi.yaml` and `contracts/api-types.ts` describe the backend routes and schemas, including timetable conflict and tuition/receipt APIs.

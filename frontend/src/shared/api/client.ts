@@ -8,6 +8,8 @@ export interface AuthUser {
   fullName: string;
   email: string | null;
   role: UserRole;
+  studentCode: string | null;
+  lecturerCode: string | null;
 }
 
 export interface ApiErrorBody {

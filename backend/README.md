@@ -46,7 +46,7 @@ alembic upgrade head
 alembic check
 ```
 
-Pytest uses an in-memory SQLite database and does not require MySQL. Migration commands require a MySQL database at `DATABASE_URL`; CI runs them against MySQL 8.4. ORM and Alembic table names stay uppercase to match `db/schema.sql` on case-sensitive MySQL hosts.
+Pytest uses an in-memory SQLite database and does not require MySQL. Alembic uses `DATABASE_URL`; CI validates the migrations against MySQL 8.4, while local SQLite can be used for a migration smoke test only. ORM and Alembic table names stay uppercase to match `db/schema.sql` on case-sensitive MySQL hosts.
 
 Feature 10 adds `tests/test_admin_training.py` and opt-in integration tests in `tests/integration/`. Seed the deterministic dataset with `python -m scripts.seed_test_data`, then run `pytest -m integration` while MySQL, gateway, and frontend are running. Full instructions are in [../docs/testing/feature10-admin-training.md](../docs/testing/feature10-admin-training.md).
 
@@ -59,7 +59,7 @@ app/
 ├─ controller/   HTTP routes, request validation, response DTOs
 ├─ service/      business rules and transaction boundaries
 ├─ repository/   database queries
-├─ entity/       SQLAlchemy mapping for the eight canonical tables
+├─ entity/       SQLAlchemy mappings for catalog, registration, and tuition tables
 ├─ dto/          input/output schemas and common responses
 ├─ security/     JWT, password hashing, role dependencies
 └─ core/         settings, database sessions, errors, time handling
@@ -75,10 +75,14 @@ All UC001-UC009 business services are fully implemented and verified with automa
 - Section Roster (UC003, UC009): Enrolled student listings for lecturers and administrators.
 - Course Registration & Cancellation (UC005, UC006): Per-student row locking (SELECT ... FOR UPDATE), atomic capacity updates, and semester credit limit enforcement. Prerequisite and corequisite checks are excluded.
 - Timetable (UC007, UC008): Weekly schedule calculation for students and lecturers.
+- Timetable conflicts: Shared period/week overlap engine classifies student, room, and lecturer conflicts; schedule edits report affected registered students.
+- Tuition and receipts: Effective-dated rates, TCHP-based invoice snapshots, discounts, installments, idempotent simulated payments, receipt history, and downloadable PDF receipts.
 - Single Registration Semester: All services operate against a single active semester (2026.1); query parameters default to this active semester if omitted.
 - Academic records (UC010): assigned lecturers record attendance by scheduled class date, enter component grades, and export attendance/gradebook workbooks. ADMIN configures section-specific grade columns; final grades use weighted normalization to 10 and nearest-0.5 rounding.
 
-Tests and static checks (pytest, ruff check, alembic check) pass completely.
+Tuition rates and discounts in the SQL seed are mock values. Confirm official rates, discount policies, receipt logo, and payment integration before production use. PDF generation uses the bundled Noto Sans font by default; `RECEIPT_FONT_PATH` and `RECEIPT_LOGO_PATH` can override the font and logo.
+
+Run `pytest` and `ruff check .` from this directory. Migration/schema verification is documented above; integration tests requiring MySQL are opt-in.
 
 ## CI/CD and local deployment
 

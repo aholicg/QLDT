@@ -45,5 +45,16 @@ Quy ước này được cập nhật sau tài liệu thiết kế và được 
 | `GET/PUT /api/sections/{id}/grade-components` | ADMIN xem/cấu hình cột điểm theo lớp |
 | `GET /api/sections/{id}/exports/attendance` | Xuất điểm danh Excel; giảng viên phụ trách lớp |
 | `GET /api/sections/{id}/exports/grades` | Xuất bảng điểm Excel; giảng viên phụ trách lớp |
+| `POST /api/timetable/check` | Kiểm tra xung đột thời khóa biểu, không ghi dữ liệu |
+| `GET /api/tuition/me` | Sinh viên xem hóa đơn học phí, query `semesterId` tùy chọn |
+| `POST /api/tuition/me/payments` | Sinh viên thanh toán theo đợt/toàn bộ, yêu cầu `idempotencyKey` |
+| `GET /api/receipts/me`, `GET /api/receipts/{receiptId}` | Danh sách/chi tiết biên lai của chính sinh viên |
+| `GET /api/receipts/{receiptId}/pdf` | Tải PDF biên lai; chỉ chủ biên lai hoặc ADMIN |
+| `/api/admin/tuition-rates` | ADMIN quản lý đơn giá theo học kỳ, khóa/ngành, khoảng hiệu lực |
+| `/api/admin/tuition/discounts` | ADMIN cấp/thu hồi miễn giảm học phí |
+| `/api/admin/tuition/installments` | ADMIN cấu hình các đợt nộp theo học kỳ |
+| `/api/admin/tuition/invoices` | ADMIN tạo, liệt kê hóa đơn và xem báo cáo học phí |
 
 `GET /api/sections` trả `remainingSeats`, `full`, `registeredByMe`. Request/response schemas, verbs CRUD còn thiếu phải đọc từ OpenAPI, không suy đoán.
+
+Học phí được tính theo TCHP và đơn giá có hiệu lực tại ngày bắt đầu học kỳ. Thanh toán giả lập có tính idempotent; biên lai giữ snapshot bất biến để tải lại PDF. Đơn giá/miễn giảm trong seed chỉ là dữ liệu kiểm thử, không phải mức thu chính thức.

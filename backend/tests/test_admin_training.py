@@ -460,6 +460,61 @@ def test_section_detects_room_and_lecturer_conflicts(client, training_world):
     )
 
 
+def test_admin_schedule_update_reports_student_conflict_structure(client, training_world):
+    admin = _admin(client)
+    student = _student(client)
+    first = _create_section(
+        client,
+        admin,
+        training_world,
+        "SEC-STUDENT-1",
+        dayOfWeek=2,
+        startPeriod=1,
+        endPeriod=3,
+    )
+    second = _create_section(
+        client,
+        admin,
+        training_world,
+        "SEC-STUDENT-2",
+        subjectId=training_world["subject_b"].id,
+        lecturerId=training_world["gv2"].id,
+        roomId=training_world["room_b"].id,
+        dayOfWeek=3,
+        startPeriod=5,
+        endPeriod=6,
+        maxCapacity=30,
+    )
+    _register(client, student, first["id"])
+    _register(client, student, second["id"])
+
+    update = client.put(
+        f"/api/sections/{second['id']}",
+        headers=admin,
+        json=_update_payload(
+            training_world,
+            "SEC-STUDENT-2",
+            subjectId=training_world["subject_b"].id,
+            lecturerId=training_world["gv2"].id,
+            roomId=training_world["room_b"].id,
+            dayOfWeek=2,
+            startPeriod=2,
+            endPeriod=4,
+            maxCapacity=30,
+        ),
+    )
+    assert update.status_code == 409, update.text
+    assert update.json()["error"] == "SCHEDULE_CONFLICT"
+    detail = update.json()["details"][0]
+    assert detail["type"] == "STUDENT"
+    assert detail["sectionA"] == "SEC-STUDENT-2"
+    assert detail["sectionB"] == "SEC-STUDENT-1"
+    assert detail["studentCode"] == "20210001"
+    assert detail["dayOfWeek"] == 2
+    assert detail["periods"] == {"start": 2, "end": 3}
+    assert detail["weeks"] == {"start": 1, "end": 15}
+
+
 def test_section_update_guards_capacity_and_enrolled_identity(client, training_world, db_session):
     admin = _admin(client)
     student1 = _student(client)
