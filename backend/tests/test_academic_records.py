@@ -70,8 +70,8 @@ def test_final_score_rounds_to_nearest_half_point():
 
 
 def test_excel_text_escapes_formula_prefixes():
-    assert AcademicRecordsService._safe_excel_text("=HYPERLINK(\"https://example.com\")") == (
-        "'=HYPERLINK(\"https://example.com\")"
+    assert AcademicRecordsService._safe_excel_text('=HYPERLINK("https://example.com")') == (
+        '\'=HYPERLINK("https://example.com")'
     )
 
 
@@ -154,9 +154,10 @@ def test_attendance_is_saved_for_scheduled_day_and_exported(client, db_session):
         export_response.headers["content-type"]
         == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-    assert f"filename*=UTF-8''diem-danh-lop-{section_id}.xlsx" in export_response.headers[
-        "content-disposition"
-    ]
+    assert (
+        f"filename*=UTF-8''diem-danh-lop-{section_id}.xlsx"
+        in export_response.headers["content-disposition"]
+    )
     workbook = load_workbook(BytesIO(export_response.content), read_only=True)
     sheet = workbook["Diem danh"]
     assert list(sheet.iter_rows(min_row=1, max_row=1, values_only=True))[0][:3] == (
@@ -227,9 +228,10 @@ def test_gradebook_uses_weighted_scores_and_half_point_rounding(client, db_sessi
         export_response.headers["content-type"]
         == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-    assert f"filename*=UTF-8''bang-diem-lop-{section_id}.xlsx" in export_response.headers[
-        "content-disposition"
-    ]
+    assert (
+        f"filename*=UTF-8''bang-diem-lop-{section_id}.xlsx"
+        in export_response.headers["content-disposition"]
+    )
     workbook = load_workbook(BytesIO(export_response.content), read_only=True)
     sheet = workbook["Bang diem"]
     assert sheet.max_row == 2
@@ -355,9 +357,7 @@ def test_only_assigned_lecturer_can_access_academic_records(client, db_session):
                 ]
             },
         ),
-        client.get(
-            f"/api/sections/{section_id}/exports/attendance", headers=student_headers
-        ),
+        client.get(f"/api/sections/{section_id}/exports/attendance", headers=student_headers),
         client.get(f"/api/sections/{section_id}/exports/grades", headers=student_headers),
     ]
     for denied_response in student_requests:
@@ -395,9 +395,7 @@ def test_only_assigned_lecturer_can_access_academic_records(client, db_session):
                 ]
             },
         ),
-        client.get(
-            f"/api/sections/{section_id}/exports/attendance", headers=outsider_headers
-        ),
+        client.get(f"/api/sections/{section_id}/exports/attendance", headers=outsider_headers),
         client.get(f"/api/sections/{section_id}/exports/grades", headers=outsider_headers),
     ]
     for denied_response in lecturer_requests:
