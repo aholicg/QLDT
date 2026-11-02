@@ -2,7 +2,11 @@ from fastapi import APIRouter, Query, Response, status
 
 from app.core.database import DbSession
 from app.dto.common import ItemList
-from app.dto.registration.registration import RegisterRequest, Registration
+from app.dto.registration.registration import (
+    ChangeSectionRequest,
+    RegisterRequest,
+    Registration,
+)
 from app.security.dependencies import StudentUser
 from app.service.catalog.semester_service import SemesterService
 from app.service.registration.registration_service import RegistrationService
@@ -39,3 +43,14 @@ def my_registrations(
 def cancel(registration_id: int, user: StudentUser, db: DbSession):
     RegistrationService(db).cancel(user, registration_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.put(
+    "/{registration_id}/change",
+    response_model=Registration,
+    summary="Đổi lớp học phần (UC006 - Atomic Change)",
+)
+def change_section(
+    registration_id: int, body: ChangeSectionRequest, user: StudentUser, db: DbSession
+):
+    return RegistrationService(db).change_section(user, registration_id, body)

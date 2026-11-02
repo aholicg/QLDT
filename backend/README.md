@@ -78,6 +78,7 @@ All UC001-UC009 business services are fully implemented and verified with automa
 - Timetable conflicts: Shared period/week overlap engine classifies student, room, and lecturer conflicts; schedule edits report affected registered students.
 - Tuition and receipts: Effective-dated rates, TCHP-based invoice snapshots, discounts, installments, idempotent simulated payments, receipt history, and downloadable PDF receipts.
 - Single Registration Semester: All services operate against a single active semester (2026.1); query parameters default to this active semester if omitted.
+- Academic records (UC010): assigned lecturers record attendance by scheduled class date, enter component grades, and export attendance/gradebook workbooks. ADMIN configures section-specific grade columns; final grades use weighted normalization to 10 and nearest-0.5 rounding.
 
 Tuition rates and discounts in the SQL seed are mock values. Confirm official rates, discount policies, receipt logo, and payment integration before production use. PDF generation uses the bundled Noto Sans font by default; `RECEIPT_FONT_PATH` and `RECEIPT_LOGO_PATH` can override the font and logo.
 

@@ -27,6 +27,7 @@ Set `VITE_API_BASE_URL` in `.env.local` only when using a different API origin; 
 
 - Single active registration semester: registration, timetable, and section views auto-bind to the active semester. Course catalog reads the backend subject API; admin subject/section forms and timetable assignments persist through backend APIs.
 - Roster student table is implemented in `SectionRosterPage` for UC003/UC009.
+- Lecturer section pages include scheduled-session attendance and section gradebooks (UC010); ADMIN configures grade components per section, and lecturers can export attendance/grade workbooks.
 - Error handling maps API error codes directly to user feedback.
 
 ## UI conventions

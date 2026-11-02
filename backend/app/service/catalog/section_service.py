@@ -28,6 +28,7 @@ from app.repository.catalog.lookup_repository import LookupRepository
 from app.repository.catalog.section_repository import SectionRepository
 from app.repository.catalog.semester_repository import SemesterRepository
 from app.repository.catalog.subject_repository import SubjectRepository
+from app.repository.registration.academic_records_repository import AcademicRecordsRepository
 from app.repository.registration.registration_repository import RegistrationRepository
 
 
@@ -38,6 +39,7 @@ class SectionService:
         self.db = db
         self.sections = SectionRepository(db)
         self.registrations = RegistrationRepository(db)
+        self.academic_records = AcademicRecordsRepository(db)
         self.lookups = LookupRepository(db)
         self.subjects = SubjectRepository(db)
         self.semesters = SemesterRepository(db)
@@ -375,6 +377,8 @@ class SectionService:
 
         if self.sections.count_registrations(section_id) > 0:
             raise AppError(ErrorCode.SECTION_HAS_REGISTRATIONS)
+        if self.academic_records.section_has_academic_records(section_id):
+            raise AppError(ErrorCode.SECTION_HAS_ACADEMIC_RECORDS)
 
         self.sections.delete(entity)
         self.db.commit()

@@ -212,6 +212,77 @@ CREATE TABLE REGISTRATIONS (
   COMMENT 'Bản ghi đăng ký lớp học phần của sinh viên';
 
 -- ---------------------------------------------------------------------
+-- ATTENDANCE_RECORDS: điểm danh từng sinh viên theo ngày học
+-- ---------------------------------------------------------------------
+CREATE TABLE ATTENDANCE_RECORDS (
+    attendance_id   BIGINT NOT NULL AUTO_INCREMENT,
+    section_id      BIGINT NOT NULL,
+    student_id      BIGINT NOT NULL,
+    class_date      DATE NOT NULL,
+    status          ENUM('PRESENT', 'ABSENT', 'LATE', 'EXCUSED') NOT NULL,
+    marked_by_user_id BIGINT NOT NULL,
+    updated_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (attendance_id),
+    UNIQUE KEY uq_attendance_section_student_date (section_id, student_id, class_date),
+    KEY ix_attendance_section_date (section_id, class_date),
+    CONSTRAINT fk_attendance_section FOREIGN KEY (section_id) REFERENCES COURSE_SECTIONS (section_id)
+        ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT fk_attendance_student FOREIGN KEY (student_id) REFERENCES STUDENTS (student_id)
+        ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT fk_attendance_marked_by FOREIGN KEY (marked_by_user_id) REFERENCES USERS (user_id)
+        ON UPDATE CASCADE ON DELETE RESTRICT
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci
+  COMMENT 'Điểm danh theo buổi học phần';
+
+-- ---------------------------------------------------------------------
+-- SECTION_GRADE_COMPONENTS: cấu hình cột điểm theo từng lớp/học kỳ
+-- ---------------------------------------------------------------------
+CREATE TABLE SECTION_GRADE_COMPONENTS (
+    component_id      BIGINT NOT NULL AUTO_INCREMENT,
+    section_id        BIGINT NOT NULL,
+    name              VARCHAR(80) NOT NULL,
+    weight_percentage DECIMAL(5,2) NOT NULL,
+    max_score         DECIMAL(5,2) NOT NULL,
+    sort_order        INT NOT NULL,
+    PRIMARY KEY (component_id),
+    UNIQUE KEY uq_grade_components_section_name (section_id, name),
+    UNIQUE KEY uq_grade_components_section_order (section_id, sort_order),
+    KEY ix_grade_components_section (section_id),
+    CONSTRAINT fk_grade_components_section FOREIGN KEY (section_id) REFERENCES COURSE_SECTIONS (section_id)
+        ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT ck_grade_components_weight_range CHECK (weight_percentage > 0 AND weight_percentage <= 100),
+    CONSTRAINT ck_grade_components_max_score_positive CHECK (max_score > 0)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci
+  COMMENT 'Cấu hình cột điểm của lớp học phần';
+
+-- ---------------------------------------------------------------------
+-- STUDENT_GRADES: điểm từng sinh viên ở từng cột điểm
+-- ---------------------------------------------------------------------
+CREATE TABLE STUDENT_GRADES (
+    grade_id          BIGINT NOT NULL AUTO_INCREMENT,
+    component_id      BIGINT NOT NULL,
+    student_id        BIGINT NOT NULL,
+    score             DECIMAL(5,2) NOT NULL,
+    updated_at        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by_user_id BIGINT NOT NULL,
+    PRIMARY KEY (grade_id),
+    UNIQUE KEY uq_student_grades_component_student (component_id, student_id),
+    KEY ix_student_grades_student (student_id),
+    CONSTRAINT fk_student_grades_component FOREIGN KEY (component_id) REFERENCES SECTION_GRADE_COMPONENTS (component_id)
+        ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT fk_student_grades_student FOREIGN KEY (student_id) REFERENCES STUDENTS (student_id)
+        ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT fk_student_grades_updated_by FOREIGN KEY (updated_by_user_id) REFERENCES USERS (user_id)
+        ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT ck_student_grades_score_nonnegative CHECK (score >= 0)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci
+  COMMENT 'Điểm thành phần của sinh viên';
 -- TUITION_RATES: đơn giá một tín chỉ học phí theo học kỳ / khóa / ngành
 -- ---------------------------------------------------------------------
 CREATE TABLE TUITION_RATES (

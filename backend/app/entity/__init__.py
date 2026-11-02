@@ -6,6 +6,12 @@ from app.entity.catalog.course_section import CourseSection
 from app.entity.catalog.room import Room
 from app.entity.catalog.semester import Semester
 from app.entity.catalog.subject import Subject
+from app.entity.registration.attendance import (
+    AttendanceRecord,
+    AttendanceStatus,
+    GradeComponent,
+    StudentGrade,
+)
 from app.entity.registration.registration import Registration
 from app.entity.tuition.receipt import Receipt
 from app.entity.tuition.receipt_sequence import ReceiptSequence
@@ -17,8 +23,11 @@ from app.entity.tuition.tuition_payment import TuitionPayment
 from app.entity.tuition.tuition_rate import TuitionRate
 
 __all__ = [
+    "AttendanceRecord",
+    "AttendanceStatus",
     "Base",
     "CourseSection",
+    "GradeComponent",
     "InvoiceStatus",
     "Lecturer",
     "Receipt",
@@ -28,6 +37,7 @@ __all__ = [
     "Room",
     "Semester",
     "Student",
+    "StudentGrade",
     "Subject",
     "TuitionDiscount",
     "TuitionInstallment",
