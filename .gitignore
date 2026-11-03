@@ -7,3 +7,10 @@ backend/.env.*
 !backend/.env.example
 .env
 !.env.example
+
+# Local environment files and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+.env.save
